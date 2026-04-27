@@ -803,7 +803,7 @@ with tab_exec:
                      color_discrete_sequence=['#5b6af0','#28c98e','#f0a93a','#e05260','#9b6cf0','#2cc4e0'])
     fig_bar.update_layout(**PLOTLY_THEME)
     fig_bar.update_traces(showlegend=False)
-    st.plotly_chart(fig_bar, use_container_width=True)
+    st.plotly_chart(fig_bar, width="100%")
 
 # ══════════════════════════════════════════════
 # TAB 2 — PRICING
@@ -822,14 +822,14 @@ with tab_pricing:
                 return ['background-color: rgba(224,82,96,0.12)']*len(row)
             return ['']*len(row)
 
-        st.dataframe(df_show.style.apply(color_row, axis=1), use_container_width=True, hide_index=True)
+        st.dataframe(df_show.style.apply(color_row, axis=1), width="100%", hide_index=True)
         st.download_button("📥 Exportar", to_csv_bytes(df_show), "pricing_caros.csv", "text/csv")
 
     with p_tab2:
         df_baratos = df_pricing_f[df_pricing_f['DifPct'] <= 0].sort_values('DifPct')
         cols_show  = [c for c in ['URL','Precio','PrecioCompMin','DifPct','MktMasBarato','DR','Tráfico','País'] if c in df_baratos.columns]
         df_show    = df_baratos[cols_show].rename(columns={'PrecioCompMin':'Comp. Mín','DifPct':'% Dif','MktMasBarato':'Más barato en'})
-        st.dataframe(df_show, use_container_width=True, hide_index=True)
+        st.dataframe(df_show, width="100%", hide_index=True)
         st.download_button("📥 Exportar", to_csv_bytes(df_show), "pricing_baratos.csv", "text/csv")
 
     with p_tab3:
@@ -843,7 +843,7 @@ with tab_pricing:
                                 hover_data={c: True for c in ['Temática','País','DR','Tráfico','Precio'] if c in df_sc.columns},
                                 opacity=0.75, title="Calidad SEO vs Precio — Catálogo Getlinko")
             fig_sc.update_layout(**PLOTLY_THEME)
-            st.plotly_chart(fig_sc, use_container_width=True)
+            st.plotly_chart(fig_sc, width="100%")
         else:
             st.info("Se necesita la columna DR para este gráfico. Sube el CSV de Ahrefs o asegúrate de que el CSV de Getlinko incluye DR.")
 
@@ -856,7 +856,7 @@ with tab_excl:
     with e_tab1:
         st.markdown(f"**{len(df_excl_gl_f):,}** medios que solo tiene Getlinko.")
         cols_gl = [c for c in ['URL','País','Temática','Precio','DR','DA','Tráfico'] if c in df_excl_gl_f.columns]
-        st.dataframe(drop_aux(df_excl_gl_f)[cols_gl], use_container_width=True, hide_index=True)
+        st.dataframe(drop_aux(df_excl_gl_f)[cols_gl], width="100%", hide_index=True)
         st.download_button("📥 Exportar exclusivos", to_csv_bytes(drop_aux(df_excl_gl_f)[cols_gl]), "exclusivos_getlinko.csv", "text/csv")
 
     with e_tab2:
@@ -864,7 +864,7 @@ with tab_excl:
         n_mkt_por_url = overlap.groupby('_key')['Marketplace'].nunique().reset_index(name='N_Marketplaces')
         overlap = overlap.merge(n_mkt_por_url, on='_key', how='left')
         cols_sh = [c for c in ['URL','Marketplace','Precio','DR','Tráfico','N_Marketplaces','País','Temática'] if c in overlap.columns]
-        st.dataframe(drop_aux(overlap)[cols_sh], use_container_width=True, hide_index=True)
+        st.dataframe(drop_aux(overlap)[cols_sh], width="100%", hide_index=True)
 
     with e_tab3:
         labels = ['Solo Getlinko', 'Compartidos', 'Solo Competencia']
@@ -874,7 +874,7 @@ with tab_excl:
                          title="Distribución del universo de URLs")
         fig_pie.update_layout(**PLOTLY_THEME)
         fig_pie.update_traces(textinfo='percent+label')
-        st.plotly_chart(fig_pie, use_container_width=True)
+        st.plotly_chart(fig_pie, width="100%")
 
 # ══════════════════════════════════════════════
 # TAB 4 — SHARED / PRECIO COMPARATIVO
@@ -894,7 +894,7 @@ with tab_shared:
 
     cols_p = [c for c in ['URL','Precio','PrecioCompMin','PrecioCompAvg','DifPct','MktMasBarato','DR','Tráfico','País','Temática'] if c in df_p.columns]
     st.dataframe(df_p[cols_p].rename(columns={'PrecioCompMin':'Comp.Mín','PrecioCompAvg':'Comp.Avg','DifPct':'%Dif','MktMasBarato':'Más barato'}).reset_index(drop=True),
-                 use_container_width=True, hide_index=True)
+                 width="100%", hide_index=True)
 
     st.markdown("---")
     st.subheader("Top 20 desviaciones de precio")
@@ -912,7 +912,7 @@ with tab_shared:
     fig_dev.update_layout(**PLOTLY_THEME, height=520,
                           xaxis_title="% diferencia vs precio mín. competencia",
                           yaxis_title="")
-    st.plotly_chart(fig_dev, use_container_width=True)
+    st.plotly_chart(fig_dev, width="100%")
 
     st.download_button("📥 Exportar tabla completa", to_csv_bytes(df_p[cols_p]), "comparativa_precios.csv", "text/csv")
 
@@ -933,14 +933,14 @@ with tab_captacion:
     df_capt = df_excl_comp_f[df_excl_comp_f['Marketplace'].isin(sel_mkt_capt)].sort_values(orden, ascending=False)
     cols_capt = [c for c in ['URL','Marketplace','Score','DR','Tráfico','Precio','País','Temática','DA','CF','TF'] if c in df_capt.columns]
 
-    st.dataframe(drop_aux(df_capt)[cols_capt].reset_index(drop=True), use_container_width=True, hide_index=True)
+    st.dataframe(drop_aux(df_capt)[cols_capt].reset_index(drop=True), width="100%", hide_index=True)
     st.download_button("📥 Exportar lista de captación", to_csv_bytes(drop_aux(df_capt)[cols_capt]), "captacion_prioritaria.csv", "text/csv")
 
     st.markdown("---")
     st.subheader("Distribución Score de prioridad")
     fig_hist = px.histogram(df_capt, x='Score', color='Marketplace', nbins=30, barmode='overlay', opacity=0.75)
     fig_hist.update_layout(**PLOTLY_THEME)
-    st.plotly_chart(fig_hist, use_container_width=True)
+    st.plotly_chart(fig_hist, width="100%")
 
 # ══════════════════════════════════════════════
 # TAB 6 — PAÍS & TEMÁTICA
@@ -977,11 +977,11 @@ with tab_pais:
                                   color_discrete_map={'GL_URLs':'#f3006e','Comp_URLs':'#261a4b'},
                                   title="Top 20 países: Getlinko vs Competencia")
                 fig_pais.update_layout(**PLOTLY_THEME)
-                st.plotly_chart(fig_pais, use_container_width=True)
+                st.plotly_chart(fig_pais, width="100%")
 
                 st.markdown("**Gaps por país** (competencia tiene más medios que Getlinko)")
                 st.dataframe(df_pais_mrg.rename(columns={'GL_URLs':'URLs GL','Comp_URLs':'URLs Comp','GL_PrecioAvg':'Precio Avg GL','Gap':'Gap (Comp-GL)'}),
-                             use_container_width=True, hide_index=True)
+                             width="100%", hide_index=True)
 
         with p_tab2:
             if 'Temática' not in df_gl_f.columns and 'Temática' not in df_comp_f.columns:
@@ -1007,7 +1007,7 @@ with tab_pais:
                                   color_discrete_map={'GL':'#f3006e','Comp':'#261a4b'},
                                   title="Top 20 temáticas: Getlinko vs Competencia")
                 fig_tema.update_layout(**PLOTLY_THEME, xaxis_tickangle=-35)
-                st.plotly_chart(fig_tema, use_container_width=True)
+                st.plotly_chart(fig_tema, width="100%")
 
                 if 'País' in df_gl_f.columns and 'Temática' in df_gl_f.columns:
                     st.markdown("**Heatmap País × Temática (densidad URLs Getlinko)**")
@@ -1016,4 +1016,4 @@ with tab_pais:
                     fig_heat = px.imshow(pivot, color_continuous_scale='RdPu',
                                          title="Heatmap País × Temática (URLs Getlinko)")
                     fig_heat.update_layout(**PLOTLY_THEME)
-                    st.plotly_chart(fig_heat, use_container_width=True)
+                    st.plotly_chart(fig_heat, width="100%")
