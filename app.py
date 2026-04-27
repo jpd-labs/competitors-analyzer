@@ -181,6 +181,7 @@ section.main > div {
     font-size: 0.72rem !important;
     border: none !important;
 }
+            
 
 /* SQL code block → rgba(255,255,255,0.08) */
 [data-testid="stSidebar"] [data-testid="stExpander"] pre,
