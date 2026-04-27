@@ -153,7 +153,44 @@ section.main > div {
     border-color: var(--sb-border) !important;
     background: rgba(255,255,255,0.05) !important;
 }
-[data-testid="stSidebar"] [data-testid="stExpander"] summary {
+/* Expander summary (header bar) → #f3006e */
+[data-testid="stSidebar"] [data-testid="stExpander"] summary,
+[data-testid="stSidebar"] [data-testid="stExpander"] summary > div,
+[data-testid="stSidebar"] [data-testid="stExpander"] summary p {
+    background: #f3006e !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    padding: 0.3rem 0.6rem !important;
+}
+[data-testid="stSidebar"] [data-testid="stExpander"] summary svg {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* Expander — ✅/⬜ badge pills */
+[data-testid="stSidebar"] [data-testid="stExpander"] td:last-child,
+[data-testid="stSidebar"] [data-testid="stExpander"] strong {
+    background: transparent !important;
+}
+/* Pills on "Obligatorias" and "Opcionales" inline code / emphasis */
+[data-testid="stSidebar"] [data-testid="stExpander"] code {
+    background: #f3006e !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    padding: 1px 6px !important;
+    font-size: 0.72rem !important;
+    border: none !important;
+}
+
+/* SQL code block → rgba(255,255,255,0.08) */
+[data-testid="stSidebar"] [data-testid="stExpander"] pre,
+[data-testid="stSidebar"] [data-testid="stExpander"] pre code,
+[data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stCode"],
+[data-testid="stSidebar"] [data-testid="stExpander"] .stCode,
+[data-testid="stSidebar"] [data-testid="stExpander"] .stCodeBlock {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    border-radius: 6px !important;
     color: #ffffff !important;
 }
 
