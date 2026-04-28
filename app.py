@@ -21,6 +21,11 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+st.markdown(
+    '<meta name="robots" content="noindex, nofollow">',
+    unsafe_allow_html=True
+)
+
 # ─────────────────────────────────────────────
 # THEME / CSS
 # ─────────────────────────────────────────────
