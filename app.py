@@ -21,20 +21,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-
-# ─────────────────────────────────────────────
-# NOINDEX — inyectado en <head>
-# ─────────────────────────────────────────────
-import streamlit.components.v1 as components
-components.html("""
-    <script>
-        var meta = document.createElement('meta');
-        meta.name = 'robots';
-        meta.content = 'noindex, nofollow';
-        window.parent.document.head.appendChild(meta);
-    </script>
-""", height=0)
-
 # ─────────────────────────────────────────────
 # THEME / CSS
 # ─────────────────────────────────────────────
