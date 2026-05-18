@@ -10,6 +10,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from io import BytesIO
 import datetime, re
+import requests as _requests
 
 # ─────────────────────────────────────────────
 # PAGE CONFIG
@@ -436,6 +437,153 @@ div[data-testid="metric-container"] {
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
+# AUTH — LOGIN WALL
+# ─────────────────────────────────────────────
+def _do_login(email: str, password: str):
+    """Call Getlinko API and return (token, error_msg)."""
+    try:
+        resp = _requests.post(
+            "https://api.getlinko.com/api/login_check",
+            json={"email": email, "password": password},
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            return data.get("token"), None
+        elif resp.status_code in (401, 403):
+            return None, "Email o contraseña incorrectos."
+        else:
+            return None, f"Error del servidor ({resp.status_code}). Inténtalo de nuevo."
+    except Exception as e:
+        return None, f"No se pudo conectar con el servidor: {e}"
+
+def _render_login():
+    """Render a full-page login screen matching the app's design system."""
+    st.markdown("""
+    <style>
+    /* Hide sidebar and header on login page */
+    [data-testid="stSidebar"]          { display: none !important; }
+    [data-testid="stHeader"]           { display: none !important; }
+    [data-testid="stToolbar"]          { display: none !important; }
+    [data-testid="stDecoration"]       { display: none !important; }
+
+    /* Full-page dark background */
+    html, body,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"],
+    [data-testid="stMainBlockContainer"],
+    section.main > div {
+        background: #261a4b !important;
+    }
+
+    /* Login card */
+    .login-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 90vh;
+    }
+    .login-card {
+        background: #FFFCF9;
+        border-radius: 16px;
+        padding: 2.8rem 2.4rem 2.2rem;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+    }
+    .login-logo {
+        font-family: 'Syne', sans-serif;
+        font-weight: 800;
+        font-size: 1.6rem;
+        color: #261a4b;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.1rem;
+    }
+    .login-logo span { color: #f3006e; }
+    .login-sub {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #7a6fa8;
+        margin-bottom: 2rem;
+    }
+    .login-label {
+        font-family: 'DM Mono', monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #7a6fa8;
+        margin-bottom: 0.3rem;
+    }
+    .login-error {
+        background: rgba(224,82,96,0.1);
+        border: 1px solid #e05260;
+        border-radius: 8px;
+        padding: 0.65rem 0.9rem;
+        color: #e05260 !important;
+        font-family: 'DM Mono', monospace;
+        font-size: 0.78rem;
+        margin-bottom: 1rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Center the card
+    _, col, _ = st.columns([1, 2, 1])
+    with col:
+        st.markdown("""
+        <div style="margin-top:5vh">
+            <div class="login-logo">Getlinko <span>·</span></div>
+            <div class="login-sub">Intelligence Dashboard</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.session_state.get("_login_error"):
+            st.markdown(f'<div class="login-error">⚠ {st.session_state["_login_error"]}</div>',
+                        unsafe_allow_html=True)
+
+        st.markdown('<div class="login-label">Email</div>', unsafe_allow_html=True)
+        email = st.text_input("Email", label_visibility="collapsed",
+                              placeholder="tu@email.com", key="_li_email")
+
+        st.markdown('<div class="login-label" style="margin-top:.8rem">Contraseña</div>',
+                    unsafe_allow_html=True)
+        password = st.text_input("Contraseña", type="password",
+                                 label_visibility="collapsed",
+                                 placeholder="••••••••", key="_li_pass")
+
+        st.markdown("<div style='height:1.2rem'></div>", unsafe_allow_html=True)
+
+        if st.button("Entrar →", use_container_width=True, type="primary"):
+            if not email or not password:
+                st.session_state["_login_error"] = "Introduce email y contraseña."
+                st.rerun()
+            else:
+                with st.spinner("Verificando credenciales…"):
+                    token, err = _do_login(email, password)
+                if token:
+                    st.session_state["_auth_token"] = token
+                    st.session_state["_login_error"] = None
+                    st.rerun()
+                else:
+                    st.session_state["_login_error"] = err
+                    st.rerun()
+
+        st.markdown("""
+        <div style="text-align:center; margin-top:1.4rem;
+                    font-family:'DM Mono',monospace; font-size:0.65rem;
+                    color:#7a6fa8; letter-spacing:0.06em;">
+            Acceso restringido · Solo usuarios autorizados
+        </div>
+        """, unsafe_allow_html=True)
+
+# ── Gate: show login if not authenticated ──
+if not st.session_state.get("_auth_token"):
+    _render_login()
+    st.stop()
+
+# ─────────────────────────────────────────────
 # CONSTANTS
 # ─────────────────────────────────────────────
 COLS_OBLIGATORIAS = ['URL', 'Precio']
@@ -587,6 +735,14 @@ WHERE m.type IN ('blog', 'newspaper')
 
     st.markdown("---")
     st.markdown("### 🔧 Filtros globales")
+
+# Logout button at sidebar bottom
+with st.sidebar:
+    st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
+    st.markdown("---")
+    if st.button("🚪 Cerrar sesión", use_container_width=True):
+        st.session_state["_auth_token"] = None
+        st.rerun()
 
 # ─────────────────────────────────────────────
 # LOAD & VALIDATE DATA
@@ -803,7 +959,7 @@ with tab_exec:
                      color_discrete_sequence=['#5b6af0','#28c98e','#f0a93a','#e05260','#9b6cf0','#2cc4e0'])
     fig_bar.update_layout(**PLOTLY_THEME)
     fig_bar.update_traces(showlegend=False)
-    st.plotly_chart(fig_bar, width="content")
+    st.plotly_chart(fig_bar, width="100%")
 
 # ══════════════════════════════════════════════
 # TAB 2 — PRICING
@@ -822,14 +978,14 @@ with tab_pricing:
                 return ['background-color: rgba(224,82,96,0.12)']*len(row)
             return ['']*len(row)
 
-        st.dataframe(df_show.style.apply(color_row, axis=1), width="content", hide_index=True)
+        st.dataframe(df_show.style.apply(color_row, axis=1), width="100%", hide_index=True)
         st.download_button("📥 Exportar", to_csv_bytes(df_show), "pricing_caros.csv", "text/csv")
 
     with p_tab2:
         df_baratos = df_pricing_f[df_pricing_f['DifPct'] <= 0].sort_values('DifPct')
         cols_show  = [c for c in ['URL','Precio','PrecioCompMin','DifPct','MktMasBarato','DR','Tráfico','País'] if c in df_baratos.columns]
         df_show    = df_baratos[cols_show].rename(columns={'PrecioCompMin':'Comp. Mín','DifPct':'% Dif','MktMasBarato':'Más barato en'})
-        st.dataframe(df_show, width="content", hide_index=True)
+        st.dataframe(df_show, width="100%", hide_index=True)
         st.download_button("📥 Exportar", to_csv_bytes(df_show), "pricing_baratos.csv", "text/csv")
 
     with p_tab3:
@@ -843,7 +999,7 @@ with tab_pricing:
                                 hover_data={c: True for c in ['Temática','País','DR','Tráfico','Precio'] if c in df_sc.columns},
                                 opacity=0.75, title="Calidad SEO vs Precio — Catálogo Getlinko")
             fig_sc.update_layout(**PLOTLY_THEME)
-            st.plotly_chart(fig_sc, width="content")
+            st.plotly_chart(fig_sc, width="100%")
         else:
             st.info("Se necesita la columna DR para este gráfico. Sube el CSV de Ahrefs o asegúrate de que el CSV de Getlinko incluye DR.")
 
@@ -856,7 +1012,7 @@ with tab_excl:
     with e_tab1:
         st.markdown(f"**{len(df_excl_gl_f):,}** medios que solo tiene Getlinko.")
         cols_gl = [c for c in ['URL','País','Temática','Precio','DR','DA','Tráfico'] if c in df_excl_gl_f.columns]
-        st.dataframe(drop_aux(df_excl_gl_f)[cols_gl], width="content", hide_index=True)
+        st.dataframe(drop_aux(df_excl_gl_f)[cols_gl], width="100%", hide_index=True)
         st.download_button("📥 Exportar exclusivos", to_csv_bytes(drop_aux(df_excl_gl_f)[cols_gl]), "exclusivos_getlinko.csv", "text/csv")
 
     with e_tab2:
@@ -864,7 +1020,7 @@ with tab_excl:
         n_mkt_por_url = overlap.groupby('_key')['Marketplace'].nunique().reset_index(name='N_Marketplaces')
         overlap = overlap.merge(n_mkt_por_url, on='_key', how='left')
         cols_sh = [c for c in ['URL','Marketplace','Precio','DR','Tráfico','N_Marketplaces','País','Temática'] if c in overlap.columns]
-        st.dataframe(drop_aux(overlap)[cols_sh], width="content", hide_index=True)
+        st.dataframe(drop_aux(overlap)[cols_sh], width="100%", hide_index=True)
 
     with e_tab3:
         labels = ['Solo Getlinko', 'Compartidos', 'Solo Competencia']
@@ -874,7 +1030,7 @@ with tab_excl:
                          title="Distribución del universo de URLs")
         fig_pie.update_layout(**PLOTLY_THEME)
         fig_pie.update_traces(textinfo='percent+label')
-        st.plotly_chart(fig_pie, width="content")
+        st.plotly_chart(fig_pie, width="100%")
 
 # ══════════════════════════════════════════════
 # TAB 4 — SHARED / PRECIO COMPARATIVO
@@ -894,7 +1050,7 @@ with tab_shared:
 
     cols_p = [c for c in ['URL','Precio','PrecioCompMin','PrecioCompAvg','DifPct','MktMasBarato','DR','Tráfico','País','Temática'] if c in df_p.columns]
     st.dataframe(df_p[cols_p].rename(columns={'PrecioCompMin':'Comp.Mín','PrecioCompAvg':'Comp.Avg','DifPct':'%Dif','MktMasBarato':'Más barato'}).reset_index(drop=True),
-                 width="content", hide_index=True)
+                 width="100%", hide_index=True)
 
     st.markdown("---")
     st.subheader("Top 20 desviaciones de precio")
@@ -912,7 +1068,7 @@ with tab_shared:
     fig_dev.update_layout(**PLOTLY_THEME, height=520,
                           xaxis_title="% diferencia vs precio mín. competencia",
                           yaxis_title="")
-    st.plotly_chart(fig_dev, width="content")
+    st.plotly_chart(fig_dev, width="100%")
 
     st.download_button("📥 Exportar tabla completa", to_csv_bytes(df_p[cols_p]), "comparativa_precios.csv", "text/csv")
 
@@ -933,14 +1089,14 @@ with tab_captacion:
     df_capt = df_excl_comp_f[df_excl_comp_f['Marketplace'].isin(sel_mkt_capt)].sort_values(orden, ascending=False)
     cols_capt = [c for c in ['URL','Marketplace','Score','DR','Tráfico','Precio','País','Temática','DA','CF','TF'] if c in df_capt.columns]
 
-    st.dataframe(drop_aux(df_capt)[cols_capt].reset_index(drop=True), width="content", hide_index=True)
+    st.dataframe(drop_aux(df_capt)[cols_capt].reset_index(drop=True), width="100%", hide_index=True)
     st.download_button("📥 Exportar lista de captación", to_csv_bytes(drop_aux(df_capt)[cols_capt]), "captacion_prioritaria.csv", "text/csv")
 
     st.markdown("---")
     st.subheader("Distribución Score de prioridad")
     fig_hist = px.histogram(df_capt, x='Score', color='Marketplace', nbins=30, barmode='overlay', opacity=0.75)
     fig_hist.update_layout(**PLOTLY_THEME)
-    st.plotly_chart(fig_hist, width="content")
+    st.plotly_chart(fig_hist, width="100%")
 
 # ══════════════════════════════════════════════
 # TAB 6 — PAÍS & TEMÁTICA
@@ -977,11 +1133,11 @@ with tab_pais:
                                   color_discrete_map={'GL_URLs':'#f3006e','Comp_URLs':'#261a4b'},
                                   title="Top 20 países: Getlinko vs Competencia")
                 fig_pais.update_layout(**PLOTLY_THEME)
-                st.plotly_chart(fig_pais, width="content")
+                st.plotly_chart(fig_pais, width="100%")
 
                 st.markdown("**Gaps por país** (competencia tiene más medios que Getlinko)")
                 st.dataframe(df_pais_mrg.rename(columns={'GL_URLs':'URLs GL','Comp_URLs':'URLs Comp','GL_PrecioAvg':'Precio Avg GL','Gap':'Gap (Comp-GL)'}),
-                             width="content", hide_index=True)
+                             width="100%", hide_index=True)
 
         with p_tab2:
             if 'Temática' not in df_gl_f.columns and 'Temática' not in df_comp_f.columns:
@@ -1007,7 +1163,7 @@ with tab_pais:
                                   color_discrete_map={'GL':'#f3006e','Comp':'#261a4b'},
                                   title="Top 20 temáticas: Getlinko vs Competencia")
                 fig_tema.update_layout(**PLOTLY_THEME, xaxis_tickangle=-35)
-                st.plotly_chart(fig_tema, width="content")
+                st.plotly_chart(fig_tema, width="100%")
 
                 if 'País' in df_gl_f.columns and 'Temática' in df_gl_f.columns:
                     st.markdown("**Heatmap País × Temática (densidad URLs Getlinko)**")
@@ -1016,4 +1172,4 @@ with tab_pais:
                     fig_heat = px.imshow(pivot, color_continuous_scale='RdPu',
                                          title="Heatmap País × Temática (URLs Getlinko)")
                     fig_heat.update_layout(**PLOTLY_THEME)
-                    st.plotly_chart(fig_heat, width="content")
+                    st.plotly_chart(fig_heat, width="100%")
