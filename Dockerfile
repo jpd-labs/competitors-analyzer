@@ -10,4 +10,4 @@ COPY .streamlit/config.toml .streamlit/config.toml
 
 EXPOSE 8501
 
-CMD ["streamlit", "run", "app.py"]   # ← simplificar, el config.toml ya tiene todo
+CMD ["streamlit", "run", "app.py"]
