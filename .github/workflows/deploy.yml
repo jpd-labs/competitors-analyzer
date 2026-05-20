@@ -6,12 +6,12 @@ on:
       - main
 
 env:
-  AWS_REGION: us-east-1                                         # ← cambia a tu región
-  ECR_REPOSITORY: media-intelligence-task                       # ← nombre de tu repo en ECR
+  AWS_REGION: eu-west-1                                         # ← cambia a tu región
+  ECR_REPOSITORY: catalog-media-intelligence                      # ← nombre de tu repo en ECR
   ECS_CLUSTER: claude-projects-cluster
   ECS_SERVICE: media-intelligence-task-service
   TASK_DEFINITION: media-intelligence-task
-  CONTAINER_NAME: media-intelligence-task                       # ← nombre del contenedor en la task definition
+  CONTAINER_NAME: streamlit-container                       # ← nombre del contenedor en la task definition
 
 jobs:
   deploy:
