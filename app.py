@@ -68,8 +68,7 @@ section.main > div {
 }
 
 /* ── SIDEBAR ── */
-[data-testid="stSidebar"],
-[data-testid="stSidebar"] > div {
+[data-testid="stSidebar"] {
     background: var(--sb-bg) !important;
     border-right: 1px solid var(--sb-border);
 }
@@ -102,14 +101,7 @@ section.main > div {
     color: #ffffff !important;
 }
 
-/* Sidebar inputs background & placeholder */
-[data-testid="stSidebar"] input,
-[data-testid="stSidebar"] textarea,
-[data-testid="stSidebar"] [data-baseweb="input"] input {
-    background: rgba(255,255,255,0.08) !important;
-    color: #ffffff !important;
-    border-color: var(--sb-border) !important;
-}
+/* Sidebar inputs placeholder */
 [data-testid="stSidebar"] input::placeholder,
 [data-testid="stSidebar"] textarea::placeholder {
     color: var(--sb-bg) !important;
@@ -196,60 +188,16 @@ section.main > div {
 }
 
 /* Sidebar file uploader — dropzone inner container */
-[data-testid="stSidebar"] .st-emotion-cache-h2yu1l {
-    background-color: rgba(255,255,255,0.08) !important;
-}
-
-/* Sidebar file uploader box */
-[data-testid="stSidebar"] [data-testid="stFileUploadDropzone"] {
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
     background: rgba(255,255,255,0.08) !important;
-    border: 1px solid var(--sb-border) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
     border-radius: 6px !important;
 }
-[data-testid="stSidebar"] [data-testid="stFileUploadDropzone"] * {
-    color: #ffffff !important;
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] [data-testid="stFileChip"] {
+    background: var(--g-muted) !important;
 }
-/* Browse files button → #f3006e */
-[data-testid="stSidebar"] [data-testid="stFileUploadDropzone"] button,
-[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] button,
-[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"],
-[data-testid="stSidebar"] .stFileUploader button {
-    background: #f3006e !important;
-    color: #ffffff !important;
-    border: none !important;
-    border-radius: 6px !important;
-    font-family: var(--g-mono) !important;
-    font-size: 0.75rem !important;
-    letter-spacing: 0.05em !important;
-}
-[data-testid="stSidebar"] [data-testid="stFileUploadDropzone"] button:hover,
-[data-testid="stSidebar"] .stFileUploader button:hover {
-    background: #c8005a !important;
-}
-/* Drag & drop text and helper text */
-[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"],
-[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] * {
-    color: rgba(255,255,255,0.75) !important;
-}
-/* Uploaded file name row (rgb 49,51,63 fix) */
-[data-testid="stSidebar"] [data-testid="stFileUploaderFileName"],
-[data-testid="stSidebar"] [data-testid="stFileUploaderFileName"] *,
-[data-testid="stSidebar"] [data-testid="stFileUploaderFileData"],
-[data-testid="stSidebar"] [data-testid="stFileUploaderFileData"] *,
-[data-testid="stSidebar"] .st-emotion-cache-9ycgxx,
-[data-testid="stSidebar"] .st-emotion-cache-1gulkj5 {
-    color: #ffffff !important;
-}
-/* File uploader delete/X button */
-[data-testid="stSidebar"] [data-testid="stFileUploaderDeleteBtn"] button {
-    background: transparent !important;
-    color: rgba(255,255,255,0.6) !important;
-    border: 1px solid rgba(255,255,255,0.2) !important;
-}
-[data-testid="stSidebar"] [data-testid="stFileUploaderDeleteBtn"] button:hover {
-    background: rgba(243,0,110,0.2) !important;
-    color: #f3006e !important;
-    border-color: #f3006e !important;
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] [data-testid="stBaseButton-secondary"] {
+    background: var(--g-accent) !important;
 }
 
 /* ── HEADER STRIP ── */
