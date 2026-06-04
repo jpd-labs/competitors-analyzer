@@ -10,6 +10,18 @@ import plotly.express as px
 import plotly.graph_objects as go
 from io import BytesIO
 import datetime, re
+from sso_client import StreamlitSSO
+
+# ─────────────────────────────────────────────
+# SSO
+# ─────────────────────────────────────────────
+sso = StreamlitSSO(
+    audience="media_intelligence", 
+    app_url="", 
+    cookie_prefix="media_intel_" 
+)
+
+user = sso.authenticate()
 
 # ─────────────────────────────────────────────
 # PAGE CONFIG
