@@ -6,6 +6,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
+COPY sso_client.py .
 COPY .streamlit/config.toml .streamlit/config.toml
 
 EXPOSE 8501
