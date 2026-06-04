@@ -17,7 +17,7 @@ from sso_client import StreamlitSSO
 # ─────────────────────────────────────────────
 sso = StreamlitSSO(
     audience="media_intelligence", 
-    app_url="", 
+    app_url=os.environ.get("APP_URL", "https://catalog.getlinko.com/media-intelligence"),
     cookie_prefix="media_intel_" 
 )
 
