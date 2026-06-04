@@ -4,6 +4,7 @@ Getlinko · Competitive Intelligence Dashboard
 Streamlit app — single file, no external DB needed.
 """
 
+import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
