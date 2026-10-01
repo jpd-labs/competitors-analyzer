@@ -45,7 +45,7 @@ class StreamlitSSO:
         if not self.internal_secret:
             raise RuntimeError("INTERNAL_SERVER_SECRET environment variable is not set.")
 
-        self.jwt_secret = os.environ.get("JWT_SECRET")
+        self.jwt_secret = os.environ.get("JWT_PUBLIC_KEY")
         if not self.jwt_secret:
             raise RuntimeError("JWT_SECRET environment variable is not set.")
 
