@@ -3,6 +3,15 @@ import urllib.parse
 import requests
 import jwt
 import streamlit as st
+if not hasattr(st, "cache"):
+    def _cache_compat(*args, **kwargs):
+        # Strip legacy kwargs that st.cache_data doesn't accept
+        kwargs.pop("allow_output_mutation", None)
+        kwargs.pop("suppress_st_warning", None)
+        if args and callable(args[0]):
+            return st.cache_data(args[0])
+        return st.cache_data(**kwargs)
+    st.cache = _cache_compat
 from streamlit_cookies_manager import EncryptedCookieManager
 from typing import Optional, Dict, Any
 
