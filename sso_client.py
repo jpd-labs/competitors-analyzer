@@ -68,10 +68,11 @@ class StreamlitSSO:
             self._exchange_code_for_token(st.query_params["code"])
 
         # 2. SCENARIO B: The user already has an active session cookie.
-        session_token = self.cookies.get("session_token")
+        session_token = st.session_state.get("session_token") or self.cookies.get("session_token")
         if session_token:
             user_data = self._validate_token(session_token)
             if user_data:
+                st.session_state["session_token"] = session_token
                 return user_data
 
         # 3. If no valid session is found, force redirection to the SSO Portal.
@@ -101,7 +102,8 @@ class StreamlitSSO:
             )
 
             if response.status_code == 200:
-                real_jwt = response.json().get("access_token")
+                data = response.json()
+                real_jwt = data.get("access_token") or data.get("token")
 
                 # FIX: Guard against a 200 that returns an empty or malformed body.
                 if not real_jwt:
@@ -109,6 +111,7 @@ class StreamlitSSO:
                     st.stop()
 
                 # Save the real JWT in the encrypted browser cookie.
+                st.session_state["session_token"] = real_jwt
                 self.cookies["session_token"] = real_jwt
                 self.cookies.save()
 
@@ -131,7 +134,7 @@ class StreamlitSSO:
             payload = jwt.decode(
                 token,
                 self.jwt_secret,
-                algorithms=["HS256"],
+                algorithms=["RS256"],
                 audience=self.audience  # STRICT SECURITY: Rejects tokens generated for other apps.
             )
 
@@ -140,11 +143,15 @@ class StreamlitSSO:
                 "roles": payload.get("roles", [])
             }
 
-        except (jwt.InvalidAudienceError, jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        except Exception as e:
+            st.error(f"JWT Validation Failed: {type(e).__name__} - {e}")
+            st.write("Audience expected:", self.audience)
+            st.stop()
+        #except (jwt.InvalidAudienceError, jwt.ExpiredSignatureError, jwt.InvalidTokenError):
             # If the token is manipulated, expired, or belongs to another app, destroy the session.
-            del self.cookies["session_token"]
-            self.cookies.save()
-            return None
+        #    del self.cookies["session_token"]
+        #    self.cookies.save()
+        #    return None
 
     def _redirect_to_login(self):
         """Safely encodes the return URL and redirects the browser to the SSO portal."""
